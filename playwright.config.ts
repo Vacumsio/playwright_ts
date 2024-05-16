@@ -2,18 +2,26 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  retries: 2,
+  reporter: [['html', { outputFolder: 'tests/report', open: 'never' }]],
   use: {
+    launchOptions: {
+      timeout: 0,
+      args: ['--start-maximized'],
+    },
+    headless: true,
     trace: 'on-first-retry',
+  },
+  expect: {
+    toHaveScreenshot: {  maxDiffPixelRatio: 0.25 },
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+      },
     },
-  ],
+  ]
 });
