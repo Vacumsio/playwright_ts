@@ -2,13 +2,17 @@
   "name": "playwright_ts",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "e2e": "npx playwright test",
+    "test:e2e": "cross-env PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1 npx playwright test"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
     "@playwright/test": "^1.44.0",
-    "@types/node": "^20.12.12"
+    "@types/node": "^20.12.12",
+    "cross-env": "^7.0.3"
   }
 }
