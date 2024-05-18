@@ -46,28 +46,42 @@ test.describe('Find video', async ()=>{
         .toContainText(/./)
     })
 
-    test('Play video, goto, logo changed', async({page})=>{
+    test('Play video, after goto logo changed', async({page})=>{
       await page.locator('.desktop-layout-floors__leftColumn-2p a[href="/video"] li[aria-selected="false"]').click();
       await expect(page.locator('.navigation-sidebar__container-TO a[href="/video"] li[aria-selected="true"]')).toBeVisible()
     })
 
-    test('Play video, wait for tabbar hidden',async ({page})=>{
+    test('Play video, is playing',async ({page, context})=>{
       await page.locator('.desktop-layout-floors__leftColumn-2p a[href="/video"] li[aria-selected="false"]').click();
-
-      await page.locator('.input-search__input-25[data-testid="search-input"]').fill("Синий трактор");
-      await page.locator('.input-search__root-yl button[aria-label="Кнопка Найти"]').click();
-
-      await page.locator('.feed__row:first-child .card-layer-video-view__player-block > a').click();
-      expect(page.locator('.zen-ui-video-video-timeline__clickable-zone').waitFor({ state: 'hidden' })).toBeTruthy();
+      await page.locator('.input-search__input-25[data-testid="search-input"]').click();
+      await page.fill('.input-search__input-25[data-testid="search-input"]','Синий трактор');
+      await page.keyboard.press('Enter');
+      const [newPage] = await Promise.all([
+        context.waitForEvent('page'),
+        page.dispatchEvent('.feed__row:first-child .card-layer-video-view__player-block > a', 'click')
+      ]);//Flacked sometimes
+      await newPage.locator('.zen-ui-video-video-player__control-toggle').click();      
+      await newPage.waitForSelector('.zen-ui-video-video-timeline__episode-progress');
+      const element = await newPage.locator('.zen-ui-video-video-timeline__episode-progress');
+      const transform = await element.getAttribute('style');
+      const reg = /(\d[^,]+)/;
+      const match = transform.match(reg);
+      const getTimeline = match.map(parseFloat);
+      expect(getTimeline[0]).toBeLessThan(1);
     })
-    test('Play video, fullscreen',async ({page})=>{
+    test('Play video, toggle to fullscreen',async ({page, context})=>{
       await page.locator('.desktop-layout-floors__leftColumn-2p a[href="/video"] li[aria-selected="false"]').click();
-
-      await page.locator('.input-search__input-25[data-testid="search-input"]').fill("Синий трактор");
-      await page.locator('.input-search__root-yl button[aria-label="Кнопка Найти"]').click();
-
-      await page.locator('.feed__row:first-child .card-layer-video-view__player-block > a').click();
-      await page.locator('.zen-ui-video-video-fullscreen-toggle').click();
-      expect(page).toHaveScreenshot();
+      await page.locator('.input-search__input-25[data-testid="search-input"]').click();
+      await page.fill('.input-search__input-25[data-testid="search-input"]','Синий трактор');
+      await page.keyboard.press('Enter');
+      const [newPage] = await Promise.all([
+        context.waitForEvent('page'),
+        page.dispatchEvent('.feed__row:first-child .card-layer-video-view__player-block > a', 'click')
+      ]);//Flacked sometimes
+      await newPage.locator('.zen-ui-video-video-player__control-toggle').click();
+      await newPage.locator('.zen-ui-video-video-fullscreen-toggle').click();
+      await newPage.waitForSelector('.zen-ui-video-video-controls__fullscreen-close',{state: 'visible'})
+      const fullscreen = await newPage.locator('.zen-ui-video-video-controls__fullscreen-close')
+      expect(fullscreen).toBeVisible();
     })
 })
