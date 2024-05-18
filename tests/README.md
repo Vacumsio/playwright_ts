@@ -1,5 +1,23 @@
 ### E2E test
 
+## Allure
+
+```sh
+npx playwright test --reporter=line --reporter=allure-playwright
+```
+
+## Generate Allure Report
+
+```sh
+allure generate my-allure-results -o allure-report --clean
+```
+
+## Open Allure Report
+
+```sh
+allure open allure-report
+```
+
 ## Launch tests
 
 ```sh
